@@ -614,6 +614,23 @@ class Xls extends BaseReader
     }
 
     /**
+     * Loads PhpSpreadsheet from file contents.
+     *
+     * @param string $pFileContents
+     *
+     * @throws Exception
+     *
+     * @return Spreadsheet
+     */
+    public function loadFromFileContents($pFileContents)
+    {
+        // Read the OLE file
+        $this->loadOLEFromFileContents($pFilename);
+
+        return $this->continueLoad();
+    }
+
+    /**
      * Loads PhpSpreadsheet from file.
      *
      * @param string $pFilename
@@ -623,6 +640,21 @@ class Xls extends BaseReader
      * @return Spreadsheet
      */
     public function load($pFilename)
+    {
+        // Read the OLE file
+        $this->loadOLE($pFilename);
+
+        return $this->continueLoad();
+    }
+
+    /**
+     * Loads PhpSpreadsheet from file or filecontents.
+     *
+     * @throws Exception
+     *
+     * @return Spreadsheet
+     */
+    public function continueLoad()
     {
         // Read the OLE file
         $this->loadOLE($pFilename);
@@ -1360,6 +1392,25 @@ class Xls extends BaseReader
         $ole = new OLERead();
         // get excel data,
         $ole->read($pFilename);
+        // Get workbook data: workbook stream + sheet streams
+        $this->data = $ole->getStream($ole->wrkbook);
+        // Get summary information data
+        $this->summaryInformation = $ole->getStream($ole->summaryInformation);
+        // Get additional document summary information data
+        $this->documentSummaryInformation = $ole->getStream($ole->documentSummaryInformation);
+    }
+
+    /**
+     * Use OLE reader to extract the relevant data streams from the OLE file contents.
+     *
+     * @param string $pFileContents
+     */
+    private function loadOLEFromFileContents($pFileContents)
+    {
+        // OLE reader
+        $ole = new OLERead();
+        // get excel data,
+        $ole->readFileContents($pFileContents);
         // Get workbook data: workbook stream + sheet streams
         $this->data = $ole->getStream($ole->wrkbook);
         // Get summary information data

@@ -91,6 +91,31 @@ class OLERead
     private $props = [];
 
     /**
+     * Read the file from a string instead of a filename
+     *
+     * @param $pFileContents string fileContents
+     *
+     * @throws ReaderException
+     */
+    public function readFileContents($pFileContents)
+    {
+        // Get the file identifier
+        // Don't bother reading the whole file until we know it's a valid OLE file
+        $this->data = substr( $pFileContents, 0, 8 );
+
+        // Check OLE identifier
+        $identifierOle = pack('CCCCCCCC', 0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1);
+        if ($this->data != $identifierOle) {
+            throw new ReaderException('The file contents were not recognised as an OLE file');
+        }
+
+        // Get the file data
+        $this->data = $pFileContents;
+
+        $this->parseFileContents();
+    }
+
+    /**
      * Read the file.
      *
      * @param $pFilename string Filename
@@ -113,6 +138,15 @@ class OLERead
 
         // Get the file data
         $this->data = file_get_contents($pFilename);
+
+        $this->parseFileContents();
+    }
+
+    public function parseFileContents()
+    {
+        if ( empty( $this->data ) ) {
+            throw new ReaderException('The filename ' . $pFilename . ' is not recognised as an OLE file');
+        }
 
         // Total number of sectors used for the SAT
         $this->numBigBlockDepotBlocks = self::getInt4d($this->data, self::NUM_BIG_BLOCK_DEPOT_BLOCKS_POS);

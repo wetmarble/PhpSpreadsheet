@@ -8,3 +8,7 @@
 *.project
 /.settings
 /.idea
+src/PhpSpreadsheet/Shared/.DS_Store
+src/PhpSpreadsheet/.DS_Store
+src/.DS_Store
+.DS_Store
